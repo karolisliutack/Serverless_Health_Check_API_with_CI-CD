@@ -104,11 +104,7 @@
         "apigateway:DELETE",
         "apigateway:PATCH"
       ],
-      "Resource": [
-        "arn:aws:apigateway:*::/apis",
-        "arn:aws:apigateway:*::/apis/*",
-        "arn:aws:apigateway:*::/tags/*"
-      ]
+      "Resource": "arn:aws:apigateway:*::/*"
     },
     {
       "Sid": "IAMRoleManagement",
