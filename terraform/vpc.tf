@@ -56,6 +56,21 @@ resource "aws_vpc_endpoint" "dynamodb" {
   }
 }
 
+# VPC Endpoint for KMS (required for Lambda to decrypt environment variables)
+resource "aws_vpc_endpoint" "kms" {
+  count               = var.enable_vpc ? 1 : 0
+  vpc_id              = aws_vpc.lambda[0].id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.kms"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.lambda_private[*].id
+  security_group_ids  = [aws_security_group.lambda[0].id]
+  private_dns_enabled = true
+
+  tags = {
+    Name = "${var.environment}-kms-endpoint"
+  }
+}
+
 # Route table for private subnets
 resource "aws_route_table" "lambda_private" {
   count  = var.enable_vpc ? 1 : 0
