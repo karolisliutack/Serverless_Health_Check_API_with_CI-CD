@@ -68,25 +68,38 @@ Create the following environments in your repository (`Settings > Environments`)
 ```
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # CI/CD pipeline
+│       └── deploy.yml              # CI/CD pipeline
 ├── lambda/
-│   ├── handler.py              # Lambda function code
-│   └── requirements.txt        # Python dependencies
+│   ├── handler.py                  # Lambda function code
+│   └── requirements.txt            # Python dependencies
 ├── terraform/
-│   ├── bootstrap/              # Bootstrap for state backend
-│   │   └── main.tf
-│   ├── api_gateway.tf          # API Gateway configuration
-│   ├── backend.tf              # S3 backend configuration
-│   ├── data.tf                 # AWS data sources
-│   ├── dynamodb.tf             # DynamoDB table with KMS encryption
-│   ├── iam.tf                  # IAM roles and policies
-│   ├── lambda.tf               # Lambda function configuration
-│   ├── outputs.tf              # Terraform outputs
-│   ├── provider.tf             # AWS provider configuration
-│   ├── variables.tf            # Variable definitions
-│   ├── vpc.tf                  # VPC for Lambda isolation
-│   ├── staging.tfvars          # Staging environment values
-│   └── prod.tfvars             # Production environment values
+│   ├── bootstrap/                  # Bootstrap for state backend
+│   │   ├── main.tf
+│   │   └── deployment-policy.json  # IAM policy for deployer
+│   ├── modules/                    # Reusable Terraform modules
+│   │   ├── api_gateway/            # API Gateway module
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   └── outputs.tf
+│   │   ├── dynamodb/               # DynamoDB + KMS module
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   └── outputs.tf
+│   │   ├── lambda/                 # Lambda function module
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   └── outputs.tf
+│   │   └── vpc/                    # VPC module
+│   │       ├── main.tf
+│   │       ├── variables.tf
+│   │       └── outputs.tf
+│   ├── main.tf                     # Main config using modules
+│   ├── backend.tf                  # S3 backend configuration
+│   ├── outputs.tf                  # Terraform outputs
+│   ├── provider.tf                 # AWS provider configuration
+│   ├── variables.tf                # Variable definitions
+│   ├── staging.tfvars              # Staging environment values
+│   └── prod.tfvars                 # Production environment values
 └── README.md
 ```
 
