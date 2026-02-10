@@ -1,0 +1,11 @@
+environment              = "staging"
+aws_region               = "us-east-1"
+dynamodb_read_capacity   = 5
+dynamodb_write_capacity  = 5
+api_throttle_rate_limit  = 100
+api_throttle_burst_limit = 200
+lambda_timeout           = 30
+lambda_memory_size       = 256
+enable_api_key           = true
+enable_vpc               = true
+vpc_cidr                 = "10.0.0.0/16"
