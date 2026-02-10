@@ -165,13 +165,18 @@
       "Effect": "Allow",
       "Action": [
         "kms:CreateAlias",
-        "kms:DeleteAlias",
-        "kms:ListAliases"
+        "kms:DeleteAlias"
       ],
       "Resource": [
-        "arn:aws:kms:*:*:alias/*-health-check-*",
+        "arn:aws:kms:*:*:alias/*-requests-db-*",
         "arn:aws:kms:*:*:key/*"
       ]
+    },
+    {
+      "Sid": "KMSListAliases",
+      "Effect": "Allow",
+      "Action": "kms:ListAliases",
+      "Resource": "*"
     },
     {
       "Sid": "KMSCreateKey",
