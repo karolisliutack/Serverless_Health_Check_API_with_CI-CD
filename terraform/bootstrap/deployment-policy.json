@@ -57,39 +57,13 @@
     {
       "Sid": "LambdaManagement",
       "Effect": "Allow",
-      "Action": [
-        "lambda:CreateFunction",
-        "lambda:DeleteFunction",
-        "lambda:GetFunction",
-        "lambda:GetFunctionConfiguration",
-        "lambda:UpdateFunctionCode",
-        "lambda:UpdateFunctionConfiguration",
-        "lambda:AddPermission",
-        "lambda:RemovePermission",
-        "lambda:GetPolicy",
-        "lambda:ListVersionsByFunction",
-        "lambda:GetFunctionCodeSigningConfig",
-        "lambda:TagResource",
-        "lambda:UntagResource",
-        "lambda:ListTags"
-      ],
+      "Action": "lambda:*",
       "Resource": "arn:aws:lambda:*:*:function:*-health-check-function"
     },
     {
       "Sid": "DynamoDBManagement",
       "Effect": "Allow",
-      "Action": [
-        "dynamodb:CreateTable",
-        "dynamodb:DeleteTable",
-        "dynamodb:DescribeTable",
-        "dynamodb:DescribeContinuousBackups",
-        "dynamodb:UpdateContinuousBackups",
-        "dynamodb:DescribeTimeToLive",
-        "dynamodb:TagResource",
-        "dynamodb:UntagResource",
-        "dynamodb:ListTagsOfResource",
-        "dynamodb:UpdateTable"
-      ],
+      "Action": "dynamodb:*",
       "Resource": "arn:aws:dynamodb:*:*:table/*-requests-db"
     },
     {
