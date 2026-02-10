@@ -182,6 +182,7 @@
         "ec2:DescribeAvailabilityZones",
         "ec2:DescribeVpcAttribute",
         "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
         "ec2:DescribePrefixLists",
         "ec2:CreateTags",
         "ec2:DeleteTags",
