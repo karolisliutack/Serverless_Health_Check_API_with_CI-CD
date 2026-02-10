@@ -131,6 +131,7 @@
         "kms:CreateKey",
         "kms:DescribeKey",
         "kms:GetKeyPolicy",
+        "kms:PutKeyPolicy",
         "kms:GetKeyRotationStatus",
         "kms:ListResourceTags",
         "kms:ScheduleKeyDeletion",
@@ -139,7 +140,10 @@
         "kms:EnableKeyRotation",
         "kms:CreateAlias",
         "kms:DeleteAlias",
-        "kms:ListAliases"
+        "kms:ListAliases",
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
       ],
       "Resource": "*"
     },
@@ -153,12 +157,25 @@
         "logs:PutRetentionPolicy",
         "logs:TagLogGroup",
         "logs:UntagLogGroup",
-        "logs:ListTagsLogGroup"
+        "logs:ListTagsLogGroup",
+        "logs:ListTagsForResource",
+        "logs:TagResource",
+        "logs:UntagResource"
       ],
       "Resource": [
         "arn:aws:logs:*:*:log-group:/aws/lambda/*-health-check-*",
-        "arn:aws:logs:*:*:log-group:/aws/apigateway/*-health-check-*"
+        "arn:aws:logs:*:*:log-group:/aws/lambda/*-health-check-*:*",
+        "arn:aws:logs:*:*:log-group:/aws/apigateway/*-health-check-*",
+        "arn:aws:logs:*:*:log-group:/aws/apigateway/*-health-check-*:*"
       ]
+    },
+    {
+      "Sid": "CloudWatchLogsDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": "*"
     },
     {
       "Sid": "VPCManagement",
@@ -185,6 +202,8 @@
         "ec2:DeleteVpcEndpoints",
         "ec2:DescribeVpcEndpoints",
         "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeVpcAttribute",
+        "ec2:DescribeNetworkInterfaces",
         "ec2:CreateTags",
         "ec2:DeleteTags",
         "ec2:DescribeTags"
