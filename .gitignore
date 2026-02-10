@@ -40,3 +40,5 @@ Thumbs.db
 lambda/lambda_deployment.zip
 lambda/package/
 lambda/.env
+# Local settings
+.local/
