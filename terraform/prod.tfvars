@@ -1,0 +1,11 @@
+environment              = "prod"
+aws_region               = "us-east-1"
+dynamodb_read_capacity   = 10
+dynamodb_write_capacity  = 10
+api_throttle_rate_limit  = 500
+api_throttle_burst_limit = 1000
+lambda_timeout           = 30
+lambda_memory_size       = 512
+enable_api_key           = true
+enable_vpc               = true
+vpc_cidr                 = "10.1.0.0/16"
