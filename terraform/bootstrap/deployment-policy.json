@@ -96,15 +96,9 @@
         "apigateway:POST",
         "apigateway:PUT",
         "apigateway:DELETE",
-        "apigateway:PATCH",
-        "apigateway:TagResource",
-        "apigateway:UntagResource"
+        "apigateway:PATCH"
       ],
-      "Resource": [
-        "arn:aws:apigateway:*::/apis",
-        "arn:aws:apigateway:*::/apis/*",
-        "arn:aws:apigateway:*::/tags/*"
-      ]
+      "Resource": "*"
     },
     {
       "Sid": "IAMRoleManagement",
