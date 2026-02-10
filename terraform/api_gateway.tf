@@ -34,9 +34,6 @@ resource "aws_apigatewayv2_stage" "default" {
     })
   }
 
-  tags = {
-    Name = "${var.environment}-health-check-stage"
-  }
 }
 
 # Lambda integration
