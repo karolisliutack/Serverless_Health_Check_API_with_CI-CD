@@ -81,6 +81,7 @@
         "dynamodb:DescribeTable",
         "dynamodb:DescribeContinuousBackups",
         "dynamodb:UpdateContinuousBackups",
+        "dynamodb:DescribeTimeToLive",
         "dynamodb:TagResource",
         "dynamodb:UntagResource",
         "dynamodb:ListTagsOfResource",
@@ -91,13 +92,7 @@
     {
       "Sid": "APIGatewayManagement",
       "Effect": "Allow",
-      "Action": [
-        "apigateway:GET",
-        "apigateway:POST",
-        "apigateway:PUT",
-        "apigateway:DELETE",
-        "apigateway:PATCH"
-      ],
+      "Action": "apigateway:*",
       "Resource": "*"
     },
     {
