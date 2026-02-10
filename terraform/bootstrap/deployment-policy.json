@@ -96,7 +96,9 @@
         "apigateway:POST",
         "apigateway:PUT",
         "apigateway:DELETE",
-        "apigateway:PATCH"
+        "apigateway:PATCH",
+        "apigateway:TagResource",
+        "apigateway:UntagResource"
       ],
       "Resource": [
         "arn:aws:apigateway:*::/apis",
@@ -143,7 +145,10 @@
         "kms:ListAliases",
         "kms:Encrypt",
         "kms:Decrypt",
-        "kms:GenerateDataKey"
+        "kms:GenerateDataKey",
+        "kms:CreateGrant",
+        "kms:RetireGrant",
+        "kms:RevokeGrant"
       ],
       "Resource": "*"
     },
@@ -204,6 +209,7 @@
         "ec2:DescribeAvailabilityZones",
         "ec2:DescribeVpcAttribute",
         "ec2:DescribeNetworkInterfaces",
+        "ec2:DescribePrefixLists",
         "ec2:CreateTags",
         "ec2:DeleteTags",
         "ec2:DescribeTags"
