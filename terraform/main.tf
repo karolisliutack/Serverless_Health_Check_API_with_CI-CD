@@ -96,6 +96,10 @@ module "lambda" {
 module "api_gateway" {
   source = "./modules/api_gateway"
 
+  providers = {
+    aws = aws.no_tags
+  }
+
   environment          = var.environment
   lambda_invoke_arn    = module.lambda.invoke_arn
   throttle_rate_limit  = var.api_throttle_rate_limit

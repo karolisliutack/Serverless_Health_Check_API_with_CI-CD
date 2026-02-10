@@ -23,3 +23,9 @@ provider "aws" {
     }
   }
 }
+
+# Provider without default tags for API Gateway (avoids TagResource permission issue)
+provider "aws" {
+  alias  = "no_tags"
+  region = var.aws_region
+}

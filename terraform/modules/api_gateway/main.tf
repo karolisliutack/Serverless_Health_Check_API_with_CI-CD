@@ -14,7 +14,6 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.main.id
   name        = "$default"
   auto_deploy = true
-  tags        = {}
 
   default_route_settings {
     throttling_rate_limit  = var.throttle_rate_limit
