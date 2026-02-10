@@ -1,4 +1,6 @@
-# KMS Key for DynamoDB encryption (Customer Managed Key - bonus requirement)
+# DynamoDB Module - Creates DynamoDB table with KMS encryption
+
+# KMS Key for DynamoDB encryption (Customer Managed Key)
 resource "aws_kms_key" "dynamodb" {
   description             = "KMS key for ${var.environment}-requests-db DynamoDB table encryption"
   deletion_window_in_days = 7
@@ -11,33 +13,9 @@ resource "aws_kms_key" "dynamodb" {
         Sid    = "Enable IAM User Permissions"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          AWS = "arn:aws:iam::${var.account_id}:root"
         }
         Action   = "kms:*"
-        Resource = "*"
-      },
-      {
-        Sid    = "Allow Key Administration"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/github-actions-deployer"
-        }
-        Action = [
-          "kms:Create*",
-          "kms:Describe*",
-          "kms:Enable*",
-          "kms:List*",
-          "kms:Put*",
-          "kms:Update*",
-          "kms:Revoke*",
-          "kms:Disable*",
-          "kms:Get*",
-          "kms:Delete*",
-          "kms:TagResource",
-          "kms:UntagResource",
-          "kms:ScheduleKeyDeletion",
-          "kms:CancelKeyDeletion"
-        ]
         Resource = "*"
       },
       {
@@ -59,7 +37,7 @@ resource "aws_kms_key" "dynamodb" {
         Sid    = "Allow Lambda to use the key"
         Effect = "Allow"
         Principal = {
-          AWS = aws_iam_role.lambda_execution.arn
+          AWS = var.lambda_role_arn
         }
         Action = [
           "kms:Encrypt",
@@ -73,7 +51,8 @@ resource "aws_kms_key" "dynamodb" {
   })
 
   tags = {
-    Name = "${var.environment}-dynamodb-kms-key"
+    Name    = "${var.environment}-dynamodb-kms-key"
+    Project = "health-check-api"
   }
 }
 
@@ -86,8 +65,8 @@ resource "aws_kms_alias" "dynamodb" {
 resource "aws_dynamodb_table" "requests" {
   name           = "${var.environment}-requests-db"
   billing_mode   = "PROVISIONED"
-  read_capacity  = var.dynamodb_read_capacity
-  write_capacity = var.dynamodb_write_capacity
+  read_capacity  = var.read_capacity
+  write_capacity = var.write_capacity
   hash_key       = "id"
 
   attribute {
@@ -95,13 +74,11 @@ resource "aws_dynamodb_table" "requests" {
     type = "S"
   }
 
-  # Server-Side Encryption with Customer Managed Key (CMK)
   server_side_encryption {
     enabled     = true
     kms_key_arn = aws_kms_key.dynamodb.arn
   }
 
-  # Point-in-time recovery for data protection
   point_in_time_recovery {
     enabled = true
   }
