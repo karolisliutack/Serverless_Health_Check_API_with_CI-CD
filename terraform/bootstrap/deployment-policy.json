@@ -144,7 +144,14 @@
       "Sid": "CloudWatchLogsDescribe",
       "Effect": "Allow",
       "Action": [
-        "logs:DescribeLogGroups"
+        "logs:DescribeLogGroups",
+        "logs:CreateLogDelivery",
+        "logs:DeleteLogDelivery",
+        "logs:GetLogDelivery",
+        "logs:UpdateLogDelivery",
+        "logs:ListLogDeliveries",
+        "logs:PutResourcePolicy",
+        "logs:DescribeResourcePolicies"
       ],
       "Resource": "*"
     },
