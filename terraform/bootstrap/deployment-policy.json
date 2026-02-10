@@ -58,7 +58,7 @@
       "Sid": "LambdaManagement",
       "Effect": "Allow",
       "Action": "lambda:*",
-      "Resource": "arn:aws:lambda:*:*:function:*-health-check-function"
+      "Resource": "*"
     },
     {
       "Sid": "DynamoDBManagement",
