@@ -47,6 +47,7 @@ Configure the following secrets in your GitHub repository (`Settings > Secrets a
 |-------------|-------------|
 | `AWS_ACCESS_KEY_ID` | AWS access key for deployment |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret access key |
+| `AWS_REGION` | AWS region (e.g., eu-central-1) |
 | `TF_STATE_BUCKET` | S3 bucket name from bootstrap output |
 | `TF_LOCK_TABLE` | DynamoDB table name from bootstrap output |
 
@@ -182,12 +183,12 @@ terraform apply
 
 ### GET Request
 ```bash
-curl -X GET https://<api-id>.execute-api.us-east-1.amazonaws.com/health
+curl -X GET https://<api-id>.execute-api.eu-central-1.amazonaws.com/health
 ```
 
 ### POST Request (with required payload)
 ```bash
-curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/health \
+curl -X POST https://<api-id>.execute-api.eu-central-1.amazonaws.com/health \
   -H "Content-Type: application/json" \
   -d '{"payload": "test data"}'
 ```
@@ -258,7 +259,7 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/health \
 
 ## Assumptions
 
-1. Single region deployment (us-east-1) - can be changed via variables
+1. Single region deployment (eu-central-1) - configured in .tfvars files
 2. Provisioned capacity for DynamoDB (can switch to on-demand if needed)
 3. Python 3.11 runtime for Lambda
 4. 14-day log retention for cost optimization
