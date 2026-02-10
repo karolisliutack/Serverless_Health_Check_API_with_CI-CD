@@ -84,6 +84,7 @@
         "dynamodb:DeleteTable",
         "dynamodb:DescribeTable",
         "dynamodb:DescribeContinuousBackups",
+        "dynamodb:UpdateContinuousBackups",
         "dynamodb:DescribeTimeToLive",
         "dynamodb:UpdateTimeToLive",
         "dynamodb:UpdateTable",
