@@ -243,6 +243,20 @@
       "Resource": "arn:aws:logs:*:*:log-group:*"
     },
     {
+      "Sid": "CloudWatchLogsDelivery",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogDelivery",
+        "logs:DeleteLogDelivery",
+        "logs:GetLogDelivery",
+        "logs:UpdateLogDelivery",
+        "logs:ListLogDeliveries",
+        "logs:PutResourcePolicy",
+        "logs:DescribeResourcePolicies"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "VPCManagement",
       "Effect": "Allow",
       "Action": [
