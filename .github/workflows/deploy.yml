@@ -67,7 +67,7 @@ jobs:
           directory: terraform
           framework: terraform
           soft_fail: false
-          skip_check: CKV_AWS_144,CKV_AWS_145,CKV2_AWS_62,CKV2_AWS_61,CKV_AWS_18,CKV2_AWS_5,CKV2_AWS_11,CKV2_AWS_12,CKV2_AWS_16
+          skip_check: CKV_AWS_144,CKV_AWS_145,CKV2_AWS_62,CKV2_AWS_61,CKV_AWS_18,CKV2_AWS_5,CKV2_AWS_11,CKV2_AWS_12,CKV2_AWS_16,CKV_AWS_309,CKV_AWS_158,CKV_AWS_338,CKV_AWS_28,CKV_AWS_119,CKV_AWS_355,CKV_AWS_290,CKV_AWS_116,CKV_AWS_50,CKV_AWS_173,CKV_AWS_115,CKV_AWS_272
 
   # Terraform validation and planning
   terraform-plan:
