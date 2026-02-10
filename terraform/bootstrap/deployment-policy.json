@@ -68,6 +68,7 @@
         "lambda:RemovePermission",
         "lambda:GetPolicy",
         "lambda:ListVersionsByFunction",
+        "lambda:GetFunctionCodeSigningConfig",
         "lambda:TagResource",
         "lambda:UntagResource",
         "lambda:ListTags"
