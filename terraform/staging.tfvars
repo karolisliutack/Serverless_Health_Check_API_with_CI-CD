@@ -1,5 +1,5 @@
 environment              = "staging"
-aws_region               = "us-east-1"
+aws_region               = "eu-central-1"
 dynamodb_read_capacity   = 5
 dynamodb_write_capacity  = 5
 api_throttle_rate_limit  = 100
