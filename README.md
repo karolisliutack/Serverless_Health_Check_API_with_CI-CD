@@ -164,6 +164,7 @@ terraform apply
 2. Add secrets:
    - `AWS_ACCESS_KEY_ID`
    - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_REGION` (e.g., `eu-central-1`)
    - `TF_STATE_BUCKET` (from bootstrap output)
    - `TF_LOCK_TABLE` (from bootstrap output)
 
