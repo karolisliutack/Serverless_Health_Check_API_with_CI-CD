@@ -17,6 +17,23 @@ table_name = os.environ.get('DYNAMODB_TABLE', 'requests-db')
 table = dynamodb.Table(table_name)
 
 
+def validate_api_key(event):
+    """
+    Validate API key if authentication is enabled.
+    Returns True if valid or auth is disabled, False otherwise.
+    """
+    api_key = os.environ.get('API_KEY')
+    if not api_key:
+        # API key auth not configured, allow request
+        return True
+
+    # Get API key from headers (case-insensitive)
+    headers = event.get('headers', {})
+    request_key = headers.get('x-api-key') or headers.get('X-Api-Key')
+
+    return request_key == api_key
+
+
 def lambda_handler(event, context):
     """
     Health check endpoint handler.
@@ -27,6 +44,18 @@ def lambda_handler(event, context):
     logger.info(f"Received request: {json.dumps(event)}")
 
     try:
+        # Validate API key if configured
+        if not validate_api_key(event):
+            logger.warning("Invalid or missing API key")
+            return {
+                'statusCode': 401,
+                'headers': {'Content-Type': 'application/json'},
+                'body': json.dumps({
+                    'status': 'error',
+                    'message': 'Unauthorized: Invalid or missing API key'
+                })
+            }
+
         # Parse request body for POST requests
         body = {}
         if event.get('body'):

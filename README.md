@@ -181,15 +181,24 @@ terraform apply
 
 ## Testing the API
 
-### GET Request
+### Get API Key
+After deployment, retrieve the API key from Terraform output:
 ```bash
-curl -X GET https://<api-id>.execute-api.eu-central-1.amazonaws.com/health
+cd terraform
+terraform output -raw api_key
 ```
 
-### POST Request (with required payload)
+### GET Request (with API key)
+```bash
+curl -X GET https://<api-id>.execute-api.eu-central-1.amazonaws.com/health \
+  -H "x-api-key: <your-api-key>"
+```
+
+### POST Request (with required payload and API key)
 ```bash
 curl -X POST https://<api-id>.execute-api.eu-central-1.amazonaws.com/health \
   -H "Content-Type: application/json" \
+  -H "x-api-key: <your-api-key>" \
   -d '{"payload": "test data"}'
 ```
 
@@ -210,6 +219,14 @@ curl -X POST https://<api-id>.execute-api.eu-central-1.amazonaws.com/health \
 }
 ```
 
+### Error Response (missing or invalid API key)
+```json
+{
+  "status": "error",
+  "message": "Unauthorized: Invalid or missing API key"
+}
+```
+
 ## Security Features
 
 ### Encryption
@@ -223,6 +240,7 @@ curl -X POST https://<api-id>.execute-api.eu-central-1.amazonaws.com/health \
 - **Security Groups**: Minimal egress rules (HTTPS only)
 
 ### API Security
+- **API Key Authentication**: Requests must include valid `x-api-key` header
 - **Throttling**: Rate limiting to prevent DDoS attacks (100 req/s staging, 500 req/s prod)
 - **Input Validation**: Lambda validates required `payload` key on POST requests
 

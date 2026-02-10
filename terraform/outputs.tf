@@ -45,3 +45,10 @@ output "vpc_id" {
   description = "VPC ID for Lambda function"
   value       = var.enable_vpc ? aws_vpc.lambda[0].id : null
 }
+
+# API Key (if enabled)
+output "api_key" {
+  description = "API key for authenticating requests"
+  value       = var.enable_api_key ? random_password.api_key[0].result : null
+  sensitive   = true
+}

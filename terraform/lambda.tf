@@ -1,3 +1,10 @@
+# Generate API key for authentication
+resource "random_password" "api_key" {
+  count   = var.enable_api_key ? 1 : 0
+  length  = 32
+  special = false
+}
+
 # Lambda function for health check endpoint
 resource "aws_lambda_function" "health_check" {
   filename         = data.archive_file.lambda.output_path
@@ -10,10 +17,13 @@ resource "aws_lambda_function" "health_check" {
   memory_size      = var.lambda_memory_size
 
   environment {
-    variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.requests.name
-      ENVIRONMENT    = var.environment
-    }
+    variables = merge(
+      {
+        DYNAMODB_TABLE = aws_dynamodb_table.requests.name
+        ENVIRONMENT    = var.environment
+      },
+      var.enable_api_key ? { API_KEY = random_password.api_key[0].result } : {}
+    )
   }
 
   # VPC configuration (conditional)

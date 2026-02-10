@@ -7,5 +7,5 @@ api_throttle_burst_limit = 200
 lambda_timeout           = 30
 lambda_memory_size       = 256
 enable_api_key           = true
-enable_vpc               = false
+enable_vpc               = true
 vpc_cidr                 = "10.0.0.0/16"
