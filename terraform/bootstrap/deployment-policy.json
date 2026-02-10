@@ -102,7 +102,8 @@
         "apigateway:POST",
         "apigateway:PUT",
         "apigateway:DELETE",
-        "apigateway:PATCH"
+        "apigateway:PATCH",
+        "apigateway:TagResource"
       ],
       "Resource": "arn:aws:apigateway:*::/*"
     },
