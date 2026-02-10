@@ -23,19 +23,39 @@ A serverless health check API built on AWS using Terraform, featuring a Lambda f
 - AWS Account with appropriate permissions
 - AWS CLI installed and configured
 
+### Bootstrap: Create Terraform State Backend
+
+Before running the CI/CD pipeline, you must create the S3 bucket and DynamoDB table for Terraform state:
+
+```bash
+cd terraform/bootstrap
+terraform init
+terraform apply
+```
+
+This creates:
+- S3 bucket for state storage (encrypted, versioned)
+- DynamoDB table for state locking
+
+Note the output values - you'll need them for GitHub secrets.
+
 ### Required GitHub Secrets
+
 Configure the following secrets in your GitHub repository (`Settings > Secrets and variables > Actions`):
 
 | Secret Name | Description |
 |-------------|-------------|
 | `AWS_ACCESS_KEY_ID` | AWS access key for deployment |
 | `AWS_SECRET_ACCESS_KEY` | AWS secret access key |
+| `TF_STATE_BUCKET` | S3 bucket name from bootstrap output |
+| `TF_LOCK_TABLE` | DynamoDB table name from bootstrap output |
 
 ### Required GitHub Environments
+
 Create the following environments in your repository (`Settings > Environments`):
 
 - **staging** - Automatic deployment on merge to main
-- **production** - Configure with required reviewers for manual approval
+- **production** - Configure with **required reviewers** for manual approval
 
 ### Local Development
 - Terraform >= 1.0
@@ -52,7 +72,10 @@ Create the following environments in your repository (`Settings > Environments`)
 │   ├── handler.py              # Lambda function code
 │   └── requirements.txt        # Python dependencies
 ├── terraform/
+│   ├── bootstrap/              # Bootstrap for state backend
+│   │   └── main.tf
 │   ├── api_gateway.tf          # API Gateway configuration
+│   ├── backend.tf              # S3 backend configuration
 │   ├── data.tf                 # AWS data sources
 │   ├── dynamodb.tf             # DynamoDB table with KMS encryption
 │   ├── iam.tf                  # IAM roles and policies
@@ -70,6 +93,30 @@ Create the following environments in your repository (`Settings > Environments`)
 
 ### Pipeline Stages
 
+```
+┌──────────────────┐     ┌──────────────────┐
+│ Dependency Scan  │     │  Security Scan   │
+│   (pip-audit)    │     │ (tfsec+checkov)  │
+└────────┬─────────┘     └────────┬─────────┘
+         │                        │
+         └───────────┬────────────┘
+                     ▼
+         ┌──────────────────────┐
+         │   Terraform Plan     │
+         │  (staging + prod)    │
+         └──────────┬───────────┘
+                    ▼
+         ┌──────────────────────┐
+         │   Deploy Staging     │
+         │    (automatic)       │
+         └──────────┬───────────┘
+                    ▼
+         ┌──────────────────────┐
+         │  Deploy Production   │
+         │ (manual approval)    │
+         └──────────────────────┘
+```
+
 1. **Dependency Scan** - Scans Lambda Python dependencies for vulnerabilities using `pip-audit`
 2. **Security Scan** - Runs `tfsec` and `checkov` on Terraform code for IaC security issues
 3. **Terraform Plan** - Generates execution plans for both staging and production
@@ -84,7 +131,33 @@ Create the following environments in your repository (`Settings > Environments`)
 
 ## Deployment Instructions
 
-### Deploy to Staging
+### Step 1: Bootstrap (One-time Setup)
+
+```bash
+# Create state backend resources
+cd terraform/bootstrap
+terraform init
+terraform apply
+
+# Note the outputs:
+# - state_bucket_name
+# - dynamodb_table_name
+```
+
+### Step 2: Configure GitHub
+
+1. Go to repository **Settings > Secrets and variables > Actions**
+2. Add secrets:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `TF_STATE_BUCKET` (from bootstrap output)
+   - `TF_LOCK_TABLE` (from bootstrap output)
+
+3. Go to **Settings > Environments**
+4. Create `staging` environment
+5. Create `production` environment with **required reviewers**
+
+### Step 3: Deploy to Staging
 
 **Option 1: Via GitHub Actions (Recommended)**
 1. Push changes to the `main` branch or merge a PR
@@ -97,14 +170,7 @@ Create the following environments in your repository (`Settings > Environments`)
 4. Select `staging` environment
 5. Click "Run workflow"
 
-**Option 3: Local Deployment**
-```bash
-cd terraform
-terraform init
-terraform apply -var-file="staging.tfvars"
-```
-
-### Deploy to Production
+### Step 4: Deploy to Production
 
 1. Ensure staging deployment is successful
 2. Go to the running workflow in GitHub Actions
@@ -148,6 +214,7 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/health \
 ### Encryption
 - **DynamoDB**: Server-Side Encryption with Customer Managed Key (CMK)
 - **KMS**: Key rotation enabled
+- **Terraform State**: Encrypted in S3
 
 ### Network Security
 - **Lambda VPC**: Function runs in isolated VPC with private subnets
@@ -155,17 +222,23 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/health \
 - **Security Groups**: Minimal egress rules (HTTPS only)
 
 ### API Security
-- **Throttling**: Rate limiting to prevent DDoS attacks
+- **Throttling**: Rate limiting to prevent DDoS attacks (100 req/s staging, 500 req/s prod)
 - **Input Validation**: Lambda validates required `payload` key on POST requests
 
 ### IAM Security
 - **Least Privilege**: All IAM policies scoped to specific resources
 - **No Wildcards**: Except where AWS requires (EC2 network interfaces for VPC)
 
+### CI/CD Security
+- **Dependency Scanning**: pip-audit checks for vulnerable packages
+- **IaC Scanning**: tfsec and checkov validate Terraform security
+- **Manual Approval**: Production requires human approval
+
 ## Design Choices
 
 ### Multi-Environment Support
 - Separate `.tfvars` files for staging and production
+- Separate Terraform state files per environment
 - Environment prefix on all resource names (`staging-*`, `prod-*`)
 - Different capacity settings per environment
 
@@ -178,10 +251,10 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/health \
 - KMS CMK for DynamoDB encryption instead of AWS managed keys
 - Key rotation enabled for compliance
 
-### Modular Terraform Structure
-- Separate files for each resource type
-- Easy to navigate and maintain
-- Clear separation of concerns
+### Remote State Management
+- S3 backend with encryption and versioning
+- DynamoDB for state locking (prevents concurrent modifications)
+- Separate state files per environment
 
 ## Assumptions
 

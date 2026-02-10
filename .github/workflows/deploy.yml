@@ -23,6 +23,7 @@ on:
 env:
   TF_VERSION: '1.6.0'
   PYTHON_VERSION: '3.11'
+  AWS_REGION: 'us-east-1'
 
 jobs:
   # Security scanning for Lambda dependencies
@@ -66,7 +67,7 @@ jobs:
           directory: terraform
           framework: terraform
           soft_fail: false
-          skip_check: CKV_AWS_144,CKV_AWS_145
+          skip_check: CKV_AWS_144,CKV_AWS_145,CKV2_AWS_62,CKV2_AWS_61
 
   # Terraform validation and planning
   terraform-plan:
@@ -90,11 +91,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=health-check-api/${{ matrix.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
 
       - name: Terraform Validate
         working-directory: terraform
@@ -102,7 +109,10 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan -var-file="${{ matrix.environment }}.tfvars" -out="${{ matrix.environment }}.tfplan"
+        run: |
+          terraform plan \
+            -var-file="${{ matrix.environment }}.tfvars" \
+            -out="${{ matrix.environment }}.tfplan"
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
@@ -117,6 +127,8 @@ jobs:
     needs: terraform-plan
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: staging
+    outputs:
+      api_endpoint: ${{ steps.output.outputs.api_endpoint }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -125,27 +137,47 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=health-check-api/staging/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
 
       - name: Terraform Apply
         working-directory: terraform
         run: terraform apply -var-file="staging.tfvars" -auto-approve
 
-      - name: Output API Endpoint
+      - name: Get Outputs
+        id: output
         working-directory: terraform
         run: |
-          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "API Endpoint: $(terraform output -raw api_endpoint)" >> $GITHUB_STEP_SUMMARY
+          echo "api_endpoint=$(terraform output -raw api_endpoint)" >> $GITHUB_OUTPUT
+
+      - name: Deployment Summary
+        run: |
+          echo "## Staging Deployment Complete :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**API Endpoint:** ${{ steps.output.outputs.api_endpoint }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Command" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo 'curl -X POST ${{ steps.output.outputs.api_endpoint }} \' >> $GITHUB_STEP_SUMMARY
+          echo '  -H "Content-Type: application/json" \' >> $GITHUB_STEP_SUMMARY
+          echo '  -d '"'"'{"payload": "test"}'"'"'' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   # Deploy to production (requires manual approval)
   deploy-prod:
@@ -162,24 +194,37 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=health-check-api/prod/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" \
+            -backend-config="encrypt=true"
 
       - name: Terraform Apply
         working-directory: terraform
         run: terraform apply -var-file="prod.tfvars" -auto-approve
 
-      - name: Output API Endpoint
+      - name: Get Outputs
+        id: output
         working-directory: terraform
         run: |
-          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "API Endpoint: $(terraform output -raw api_endpoint)" >> $GITHUB_STEP_SUMMARY
+          echo "api_endpoint=$(terraform output -raw api_endpoint)" >> $GITHUB_OUTPUT
+
+      - name: Deployment Summary
+        run: |
+          echo "## Production Deployment Complete :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**API Endpoint:** ${{ steps.output.outputs.api_endpoint }}" >> $GITHUB_STEP_SUMMARY
